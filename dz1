@@ -1,1 +1,96 @@
----
+let rec clone_char c n=
+if n = 0 then "" else ((String.make 1 c)^(clone_char c (n - 1)));;
+
+let rec turn_over l=
+match l with
+a::b->((turn_over b) @ [a])
+|[]->[];;
+
+let pointer_n n =
+let rec pointer2 n2 =
+if n2 = 0 then [] else ((pointer2 (n2 - 1)) @ [((clone_char ' ' (n2 - 1))^"*")]) in
+((pointer2 (n - 1))@[((clone_char ' ' (n - 1))^"*")]@(turn_over (pointer2 (n - 1))));;
+
+List.iter (fun x-> print_string x;print_string"\n") (pointer_n 9);;
+
+read_line();;
+
+let rec copy_list x n=
+if n = 0 then [] else (x :: (copy_list x (n - 1)));;
+
+let square_n n=
+([(clone_char '*' n)] @ (copy_list ("*"^(clone_char ' ' (n - 2))^"*") (n - 2)) @ [(clone_char '*' n)]);;
+
+List.iter (fun x-> print_string x;print_string"\n") (square_n 12);;
+
+read_line();;
+
+let king_n n=
+([(clone_char '*' n)] 
+@ (copy_list ((clone_char ' ' ((n - 1) / 2))^"*"^(clone_char ' ' ((n - 1) / 2))) ((n - 3)/2)) 
+@ [(" "^(clone_char '*' (n - 2))^" ")] 
+@ (copy_list ((clone_char ' ' ((n - 1) / 2))^"*"^(clone_char ' ' ((n - 1) / 2))) ((n - 3)/2)) @ [clone_char '*' n]);;
+
+
+List.iter (fun x-> print_string x;print_string"\n") (king_n 14);;
+
+read_line();;
+
+(*/////////////////////////////////////////////////////////////////////////*)
+                         (*
+let int_of_float2 f = if (f -. (float_of_int (int_of_float f))) >= 0.5 then ((int_of_float f)+1) else (int_of_float f);;
+                        *)
+let int_of_float2 f = (int_of_float f);;
+let mod_n n=(max n (-n));;
+
+let rec list_of_copy x n=
+if n = 0 then [] else (x::(list_of_copy x (n - 1)));;
+
+let make_matrics x y t=(list_of_copy (list_of_copy t x) y);;
+
+let rec get_m l2 n=
+match l2 with
+a::b->if n = 1 then a else get_m b (n - 1)
+|[]->failwith"{:>)}";;
+
+let get_matrics l x y=(get_m (get_m l x) y);;
+
+let replace_matrics l x y t=
+let rec replace_m l2 n z =
+match l2 with
+a::b->if n = 1 then (z::b) else (a::(replace_m b (n - 1) z))
+|[]->print_int n;failwith"{(<:}" in
+(replace_m l y (replace_m (get_m l y) x t));;
+
+let rec draw_line l x1 y1 x2 y2 i t=
+if x1 = x2 then (if y1 < y2 then (if (y1 + i) = y2 then l else (draw_line (replace_matrics l x1 (y1 + i) t) x1 y1 x2 y2 (i + 1) t)) else (**)(if (y2 + i) = y1 then l else (draw_line (replace_matrics l x1 (y2 + i) t) x1 y1 x2 y2 (i + 1) t))  ) else 
+(let len = sqrt (float_of_int (((x1 - x2)*(x1 - x2))+((y1 - y2) * (y1 - y2)))) in
+if ((float_of_int i)) > len then l else
+let dx = (((float_of_int x2) -. (float_of_int x1)) /. len) in
+let dy = (((float_of_int y2) -. (float_of_int y1)) /. len) in
+(draw_line (replace_matrics l (int_of_float ((float_of_int x1) +. (dx *. (float_of_int i)))) (int_of_float ((float_of_int y1) +. (dy *. (float_of_int i)))) t) x1 y1 x2 y2 (i + 1) t)
+);;
+
+let print_matrics l=List.iter (fun y-> (List.iter (fun x-> if x then print_string"#" else print_string" ") y;print_string"\n")) l;;
+
+let rec around l x y i1 i2 r=if (((List.length l) = (i2 - 1))&&((List.length (get_m l 1)) = (i1 - 1))) then l else (if ((List.length (get_m l 1)) = (i1 - 1)) then (around l x y 1 (i2 + 1) r) else 
+(
+if (mod_n ((((x - i1)*(x - i1)) + ((y - i2)*(y - i2))) - (r * r)) < ((r / 2) + 2)) then (around (replace_matrics l i1 i2 true) x y (i1 + 1) i2 r) else (around l x y (i1 + 1) i2 r)
+));;
+
+print_matrics (around (make_matrics 16 16 false) 8 8 1 1 7);;
+
+
+let gold n=
+let m = (make_matrics (n + 1) (n + 1) false) in
+let m1 = (draw_line m (n / 2) 1 1 (n / 2) 0 true) in
+let m2 = (draw_line m1 (n / 2) 1 n (n / 2) 0 true) in 
+let m3= (draw_line m2 (n / 2) (n / 4) (n / 2) n 0 true) in            
+let m4 = (draw_line m3 (n / 4) (n / 2) ((n * 3) / 4) (n / 2) 0 true) in  
+let m5 = (draw_line m4 (((n - 2) / 2) - (n / 8)) (n / 4) (((n - 2) / 2) + (n / 8)) (n / 4) 0 true) in
+let m6 = (draw_line m5 (n / 4) (n / 2) (n / 2) n 0 true) in
+let m7 = (draw_line m6 ((n * 3) / 4) (n / 2) (n / 2) n 0 true) in
+let m8 = (draw_line m7 2 (n - 1) (n - 1) (n - 1) 0 true) in m8
+;;
+
+print_matrics (gold 16);;
