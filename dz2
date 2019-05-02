@@ -1,0 +1,37 @@
+let rec copy_char c n= if n = 0 then "" else ((String.make 1 c)^(copy_char c (n - 1)));;
+
+type tree = Braces of tree|Star;;
+
+let rec print_tree t=
+match t with
+Braces t2->print_string"(";print_tree t2;print_string")"
+|Star ->print_string"*";;
+
+print_tree (Braces (Braces (Braces Star)));;
+print_string"\n";;
+
+let rec print_tree2 t n i=
+match t with
+Braces t2->print_string((copy_char ' ' (n * i))^"(\n");print_tree2 t2 n (i + 1);print_string((copy_char ' ' (n * i))^")\n")
+|Star -> print_string ((copy_char ' ' (n * i))^"*\n");;
+
+print_tree2 (Braces (Braces (Braces Star))) 3 0;;
+print_string"\n";;
+
+type comma = B of comma * comma|S;;
+
+let rec print_comma t=
+match t with
+B (t1,t2)->print_string"(";print_comma t2;print_string",";print_comma t1;print_string")"
+|S ->print_string"*";;
+
+print_comma (B ((B (S,S)),S));;
+
+print_string"\n";;
+
+let rec print_comma2 t n i=
+match t with
+B (t2,t3)->print_string((copy_char ' ' (n * i))^"(\n");print_comma2 t2 n (i + 1);print_comma2 t3 n (i + 1);print_string((copy_char ' ' (n * i))^")\n")
+|S -> print_string ((copy_char ' ' (n * i))^"*\n");; 
+
+print_comma2 (B ((B (S,S)),S)) 3 0;;
