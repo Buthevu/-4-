@@ -1,0 +1,55 @@
+type tree = Node of int * tree * tree|Leaf;;
+
+let chek ty=
+let rec chek2 t o=
+match t with
+Node (i,t1,t2)->(let (f1,mx1,mn1) = (chek2 t1 i) in
+                 let (f2,mx2,mn2) = (chek2 t2 i) in
+                 ((f1 && f2 && (mx1 <= i) && (i <= mn2)),mx2,mn1))
+|Leaf -> (true,o,o) in
+match ty with
+Node (i,t1,t2) -> let (p,_,_) = (chek2 ty i) in p
+|Leaf -> true;;
+
+print_string"Test chek with (Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (4,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))) (P.S. it is true)";;
+
+if (chek (Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (4,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf))))))) then print_string"\ntrue\n" else print_string"\nfalse\n";;
+
+let rec find t x=
+match t with
+Node (i,t1,t2)->if i = x then true else (if x < i then (find t1 x) else (find t2 x))
+|Leaf -> false;;
+
+print_string"Test find with 1 and (Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (4,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf))))))\n(P.S. it is true)";;
+
+if (find (Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (4,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))) 1) then print_string"\ntrue\n" else print_string"\nfalse\n";;
+
+let rec add t x=
+match t with
+Node (i,t1,t2)->if (x < i) then (Node (i,(add t1 x),t2)) else (Node (i,t1,(add t2 x)))
+|Leaf->(Node (x,Leaf,Leaf));;
+
+let rec print_tree t=
+match t with
+Leaf -> print_string"Leaf"
+|Node (i,t1,t2)->print_string"Node (";print_int i;print_string",(";print_tree t1;print_string"),(";print_tree t2;print_string"))";;
+
+print_string"Test add with 1 and (Node (5,(Node (3,Leaf,Leaf)),(Node (4,Leaf,Leaf))))";;
+
+print_tree (add (Node (5,(Node (3,Leaf,Leaf)),(Node (4,Leaf,Leaf)))) 1);;
+
+let rec sliv t1 t2=
+match (t1,t2) with
+(Leaf,a)->a
+|(a,Leaf)->a
+|(o,(Node (i,t1,t2)))->(Node (i,o,(sliv t1 t2)));;
+
+let rec destroy t x=
+match t with
+Leaf -> Leaf
+|Node (i,t1,t2)-> if x = i then (sliv t1 t2) else (if (x < i) then (Node (i,(destroy t1 x),t2)) else (Node (i,t1,(destroy t2 x))));;
+
+print_string"\nTest destroy with 1 and (Node (5,(Node (3,(Node (1,Leaf,Leaf)),Leaf)),(Node (4,Leaf,Leaf))))\n";;
+
+print_tree (destroy (Node (5,(Node (3,(Node (1,Leaf,Leaf)),Leaf)),(Node (4,Leaf,Leaf)))) 1);;
+
