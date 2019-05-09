@@ -1,0 +1,99 @@
+let rec copy_char c n= if n <= 0 then "" else ((String.make 1 c)^(copy_char c (n - 1)));;
+ 
+type tree = Node of int * tree * tree|Leaf;;
+
+
+let rec pr_tree t=
+match t with
+Node (i,t1,t2)->print_string"Node (";print_int i;print_string",(";pr_tree t1;print_string"),(";pr_tree t2;print_string"))"
+|Leaf->print_string"Leaf";;
+
+
+let rec tree_length t=
+match t with
+Leaf -> 0
+|Node (i,t1,t2)->((String.length (string_of_int i)) + (tree_length t1) + (tree_length t2));;
+
+
+let rec minus_k1 l k=
+match l with
+(i1,i2)::b->(((i1 - k),i2)::(minus_k1 b k))
+|[]->[];;
+
+let rec print_line1 l=
+match l with
+(i1,i2) :: b->print_string (copy_char ' ' i1);print_int i2;print_line1 (minus_k1 b (i1 + (String.length (string_of_int i2))))
+|[]->print_string"\n";;
+
+
+let rec minus_k2 l k=
+match l with
+(i1,i2,i3)::b->(((i1 - k),(i2 - k),(i3 - k))::(minus_k2 b k))
+|[]->[];;
+
+let rec print_line2 l=
+match l with
+(i1,i2,i3)::b->print_string (copy_char ' ' i1);print_string"+";print_string(copy_char '-' (i2 - (i1 + 1)));print_string"+";print_string(copy_char '-' (i3 - (i2 + 1)));print_string"+";print_line2 (minus_k2 b (i3 + 1))
+|[]->print_string"\n";;
+
+let rec clean l=
+match l with
+(i,Leaf)::b -> (clean b)
+|(i,Node (i1,t1,t2)) :: b -> ((i,Node (i1,t1,t2))::(clean b))
+|[]->[];;
+
+let rec separate l=
+match l with
+(i,Node (i1,t1,t2))::b->((i,t1)::(((i + (String.length (string_of_int i1)) + (tree_length t1)),t2)::(separate b)))
+|(i,Leaf)::b->failwith"---"
+|[]->[];;
+
+let rec draw_tree l old_l=
+List.iter (fun (i,t)-> print_string"(";print_int i;print_string",";pr_tree t;print_string")") l;
+print_string"\n";
+(if ((l = [])||((clean l) = [])||(l = old_l)) then () else
+print_line1 (List.map (fun (i,t)->match t with Node (i1,t1,t2) ->((i + (tree_length t1)),i1) |Leaf->failwith"") l);
+print_line2 (List.map (fun (i,t)->
+                       match t with 
+                       Node (i1,t1,t2) ->(match t1 with 
+                                         Node (i2,t11,t12)->(match t2 with
+                                                            Node (i3,t21,t22)->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12) + (String.length (string_of_int i3)) + (tree_length t21)))
+                                                            |leaf->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)))
+                                                            )
+                                        |Leaf -> match t2 with
+                                                 Node (i3,t21,t22)->(i,i,(i + (String.length (string_of_int i1)) + (tree_length t21)))
+                                                |Leaf->(i,i,i)
+                                        )
+                       |Leaf ->failwith"") l);
+let _ = read_int () in
+draw_tree (clean (separate l))) l;;
+(*  
+print_line1 (List.map (fun (i,t)->match t with Node (i1,t1,t2) ->((i + (tree_length t1)),i1) |Leaf->failwith"") [(0,(Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (2,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))))]);
+print_line2 (List.map (fun (i,t)->
+                       match t with 
+                       Node (i1,t1,t2) ->(match t1 with 
+                                         Node (i2,t11,t12)->(match t2 with
+                                                            Node (i3,t21,t22)->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12) + (String.length (string_of_int i3)) + (tree_length t21)))
+                                                            |leaf->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)))
+                                                            )
+                                        |Leaf -> match t2 with
+                                                 Node (i3,t21,t22)->(i,i,(i + (String.length (string_of_int i1)) + (tree_length t21)))
+                                                |Leaf->(i,i,i)
+                                        )
+                       |Leaf ->failwith"") [(0,(Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (2,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))))]);
+print_line1 (List.map (fun (i,t)->match t with Node (i1,t1,t2) ->((i + (tree_length t1)),i1) |Leaf->failwith"") (clean (separate [(0,(Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (2,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))))]))  );
+print_line2 (List.map (fun (i,t)->
+                       match t with 
+                       Node (i1,t1,t2) ->(match t1 with 
+                                         Node (i2,t11,t12)->(match t2 with
+                                                            Node (i3,t21,t22)->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12) + (String.length (string_of_int i3)) + (tree_length t21)))
+                                                            |leaf->(((tree_length t11)+ i),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)),(i + (tree_length t11) + (String.length (string_of_int i2))+ (tree_length t12)))
+                                                            )
+                                        |Leaf -> match t2 with
+                                                 Node (i3,t21,t22)->(i,i,(i + (String.length (string_of_int i1)) + (tree_length t21)))
+                                                |Leaf->(i,i,i)
+                                        )
+                       |Leaf ->failwith"") (clean (separate [(0,(Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (2,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))))])));
+  *)
+                           
+draw_tree [(0,(Node (5,(Node (3,(Node (1,Leaf,Leaf)),(Node (2,Leaf,Leaf)))),(Node (7,(Node (6,Leaf,Leaf)),(Node (8,Leaf,Leaf)))))))] [];;       
