@@ -1,0 +1,28 @@
+let rec sum s i1 i2=if i1>i2 then 0 else ((int_of_char (s.[i1]))+(sum s (i1 + 1) i2));;
+let rec give s i1 i2=if i1>i2 then "" else ((String.make 1 (s.[i1]))^(give s (i1 + 1) i2));;
+let rec find_sum s1 s2 i c1 c2=
+  (*  let _ = (read_int()) in
+    print_string"i = ";
+    print_int i;
+  *)  if (String.length s1) = (i + (String.length s2)) 
+        then 
+            false 
+        else 
+            (
+            (* print_string ("\nc1 = "^(string_of_int c1)^"\nc2 = "^(string_of_int c2));
+             print_string ("\n"^(give s1 i ((i - 1) + (String.length s2))));
+           *)if c1 = c2 
+                 then 
+                     (
+                      if (s2 = (give s1 i ((i - 1) + (String.length s2))))  
+                          then 
+                              true 
+                          else 
+                              (find_sum s1 s2 (i + 1) (c1 + ((int_of_char (s1.[i + (String.length s2)]))-(int_of_char (s1.[i])))) c2)
+                     ) 
+                 else
+                     (find_sum s1 s2 (i + 1) (c1 + ((int_of_char (s1.[i + (String.length s2)]))-(int_of_char (s1.[i])))) c2)
+           );; 
+                     (*(find_sum s1 s2 (i + 1) (c1 + ((int_of_char (s1.[i + (String.length s2)]))-(int_of_char (s1.[i])))) c2)*)
+if (find_sum "101100110111010011" "10011" 0 (sum "101100110111010011" 0 ((String.length "10011") - 1)) (sum "10011" 0 ((String.length "10011") - 1))) then print_string"True" else print_string"false";;         
+
