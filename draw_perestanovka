@@ -1,0 +1,35 @@
+open Graphics;;
+open_graph"300x250";;
+
+let kx = 5;;
+let ky = 10;;
+
+let rec find x arr i=
+if arr.(i) = x then i else (find x arr (i + 1))
+
+let rec draw_array arr x y=
+for i = 0 to ((Array.length arr) - 1)  do
+moveto (x + 3 * i * kx) y;
+draw_string (string_of_int (i + 1));
+done;
+for i = 0 to ((Array.length arr) - 1) do
+moveto (x + 3 * i * kx) (y - 4 * ky);
+draw_string (string_of_int ((arr.(i)) + 1));
+done;
+for i = 0 to ((Array.length arr) - 1) do
+moveto (x + 3 + 3 * i * kx) (y + 2);
+lineto (x + 3 + 3 * kx *(find i arr 0)) (y + 4 - 3 * ky);
+draw_circle (x + 3 + 3 * kx *(find i arr 0)) (y - 3 - 3 * ky) 7;
+done;;
+
+
+
+
+draw_array [|2;1;0;3;4|] 100 100;;
+draw_array [|1;2;0|] 5 50;;
+draw_array [|0;1|] 235 60;;
+draw_array [|1;0;3;2|] 10 175;;
+draw_array [|5;1;2;3;4;0|] 175 190;;
+
+
+read_key();;
