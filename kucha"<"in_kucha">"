@@ -1,0 +1,35 @@
+(*Дана куча '<' выверните на изнанку сделайте кучу '>'*)
+
+type tree = Node of tree * int * tree| Leaf of int;;
+
+let rec print_tree t=
+match t with
+Node (t1,i,t2) ->print_string"Node ((";print_tree t1;print_string"),";print_int i;print_string",(";print_tree t2;print_string")"
+|Leaf i -> print_string"Leaf ";print_int i;;
+
+let rec turn_over t=
+match t with
+Node (t1,i,t2) ->(let n_t1 = (turn_over t1) in
+                  let n_t2 = (turn_over t2) in
+                  match n_t1 with
+                  Node (t11,i1,t12) ->(match n_t2 with
+                                       Node (t21,i2,t22) -> (
+                                                            if i1 < i2 then (Node ((turn_over (Node (t11,i,t12))),i1,n_t2)) else (Node (n_t1,i2,(turn_over (Node (t21,i,t22))))) 
+                                                            )
+                                      |Leaf i2 -> (
+                                                  if i1 < i2 then (Node ((turn_over (Node (t11,i,t12))),i1,n_t2)) else (Node (n_t1,i2,Leaf i))
+                                                  )
+                                       )
+                 |Leaf i1 ->(match n_t2 with
+                            Node (t21,i2,t22) -> (
+                                                  if i1 < i2 then (Node (Leaf i,i1, n_t2)) else (Node (n_t1,i2,(turn_over (Node (t21,i,t22)))))
+                                                 )
+                           |Leaf i2 ->(
+                                       if i1 < i2 then (Node (Leaf i,i1,Leaf i2)) else (Node (Leaf i1,i2,Leaf i))
+                                      )  
+                            )
+                 )
+|Leaf i->Leaf i;;                                               
+print_tree (Node (Node (Leaf 3,5,Leaf 4),7,Node (Leaf 1,6,Leaf 2)));;
+print_string"\n-->\n";;
+print_tree (turn_over (Node (Node (Leaf 3,5,Leaf 4),7,Node (Leaf 1,6,Leaf 2))));; 
