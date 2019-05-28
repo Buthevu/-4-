@@ -1,0 +1,53 @@
+open Graphics;;
+open_graph"500x500";;
+let kx = 5;;
+let ky = 10;;
+type tree = Node of tree * int * tree|Leaf;;
+
+let rec size_tree t=
+match t with
+Leaf->0
+|Node (t1,i,t2)->((String.length (string_of_int i))+(size_tree t1)+(size_tree t2));;
+
+let rec print_line1 l=
+match l with
+(_,_,Leaf)::b->print_line1 b
+|(x,y,(Node (t1,i,t2)))::b->moveto x y;draw_string (string_of_int i);print_line1 b
+|[]->();;
+
+let rec print_line2 l1 l2=
+match l1 with
+(_,_,Leaf)::b->(print_line2 b l2)
+|(x,y,(Node (t1,i,t2)))::b->(match (t1,t2) with
+                            ((Node (t11,i1,t12)),(Node (t21,i2,t22)))->
+                                   moveto x y;
+                                   lineto (x - (kx * (1 + (size_tree t12)))) (y - ky);
+                                   moveto (x + (kx * (String.length (string_of_int i)))) y;
+                                   lineto (x + (kx * ((String.length (string_of_int i)) + 1 + (size_tree t21)))) (y - ky);
+                                   print_line2 b (l2 @ [((x - (kx * ((size_tree t12)+1+(String.length (string_of_int i1))))),(y - 2 * ky),t1);((x + (kx * ((String.length (string_of_int i)) + 1 + (size_tree t21)))),(y - 2 * ky),t2)])
+
+                           |((Node (t11,i1,t12)),Leaf)->
+                                   moveto x y;
+                                   lineto (x - (kx * ((size_tree t12) + 1))) (y - ky);
+                                   print_line2 b (l2 @ [((x - (kx * ((size_tree t12)+1+(String.length (string_of_int i1))))),(y - 2 * ky),t1)])
+                                   
+                           |(Leaf,(Node (t21,i2,t22)))->
+                                   moveto (x + (kx * (String.length (string_of_int i)))) y;
+                                   lineto (x + (kx * ((String.length (string_of_int i)) + 1 + (size_tree t21)))) (y - ky);
+                                   print_line2 b (l2 @ [((x + (kx * ((String.length (string_of_int i)) + 1 + (size_tree t21)))),(y - 2 * ky),t2)])
+
+                           |(Leaf,Leaf)->(print_line2 b l2) 
+                            )
+|[]->l2;;
+
+
+
+let rec draw_tree l=
+if l = [] then () else 
+(print_line1 l;
+let l1 = (print_line2 l []) in
+draw_tree l1);;
+
+
+draw_tree [(200,400,(Node ((Node ((Node (Leaf,8,Leaf)),7,(Node (Leaf,5,Leaf)))),3,(Node ((Node (Leaf,10,Leaf)),4,(Node (Leaf,1,Leaf)))))))];;
+read_key();;
