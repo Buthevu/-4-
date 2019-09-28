@@ -1,0 +1,28 @@
+let  print_char_int_list l=
+  let rec p_c_i_l l2=
+    match l2 with
+      (x1,y1)::(x2,y2)::c->print_string"('";
+                           print_char x1;print_string"',";
+                           print_int y1;print_string");";
+                           p_c_i_l ((x2,y2)::c)
+     |(x1,y1)::b->print_string"('";print_char x1;
+                  print_string"',";print_int y1;
+                  print_string")]" 
+     |[]->print_string"]" in
+print_string"[";
+p_c_i_l l;;
+
+let separete_line str=
+  let rec add l x=
+      match l with
+        (y,i)::b->if x = y then ((x,(i + 1))::b)
+                           else ((y,i)::(add b x))
+       |[]->[(x,1)] in
+  let rec separete s i l=
+      if i = (String.length s) then l
+                               else (separete s (i + 1) (add l (s.[i]))) in
+  (separete str 0 []);;
+
+print_char_int_list (separete_line "121234567890");;
+  
+
