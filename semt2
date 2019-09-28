@@ -1,0 +1,58 @@
+let alfav = [('a',1);('b',0);('c',0);('d',0);('e',1);('f',0);('g',0);('h',0);('i',1);('j',0);('k',0);('l',0);('m',0);
+             ('n',0);('o',1);('p',0);('q',0);('r',0);('s',0);('t',0);('u',1);('v',0);('w',0);('x',0);('y',1);('z',0);];;
+
+let rec includ x l=
+ match l with
+  a::b->if x = a then true else (includ x b)
+  |[]->false;;
+
+let  print_char_int_list l=
+  let rec p_c_i_l l2=
+    match l2 with
+      (x1,y1)::(x2,y2)::c->print_string"('";
+                           print_char x1;print_string"',";
+                           print_int y1;print_string");";
+                           p_c_i_l ((x2,y2)::c)
+     |(x1,y1)::b->print_string"('";print_char x1;
+                  print_string"',";print_int y1;
+                  print_string")]" 
+     |[]->print_string"]" in
+print_string"[";
+p_c_i_l l;;
+
+let separete_line str=
+  let rec add l x=
+      match l with
+        (y,i)::b->if x = y then ((x,(i + 1))::b)
+                           else ((y,i)::(add b x))
+       |[]->[(x,1)] in
+  let rec separete s i l=
+      if i = (String.length s) then l
+                               else (separete s (i + 1) (add l (s.[i]))) in
+  (separete str 0 []);;
+
+print_char_int_list (separete_line "121234567890");;
+
+let glasn x=
+ let rec glasn2 y l=
+   match l with
+    (r,u)::b->if (y = r) then (if u = 1 then true else false) else (glasn2 y b)
+   |[]->false in
+glasn2 x alfav;;
+
+let mo1 str=
+   let rec mo1d s i=
+     if i = (String.length s) then 0 else (if (glasn (s.[i])) then (1+(mo1d s (i+1))) else (mo1d s (i+1))) in
+((float_of_int (mo1d str 0))/.(float_of_int (String.length str)));;
+print_string"\n";;
+print_float (mo1 "it is beautiful");;
+let mo2 str=
+   let rec mo2d s i=
+     if (i + 1) >= (String.length s) then 0 else (if (glasn (s.[i])) then (if (glasn (s.[i+1])) then (1 + (mo2d s (i+1))) else (mo2d s (i+1))) else (mo2d s (i+1))) in
+((float_of_int (mo2d str 0))/.(float_of_int(String.length str)));;
+print_string"\n";;
+print_float (mo2 "it is beautiful");;
+let rec superfun s sum n m i=if i = (String.length s) then (if m = 0 then ((float_of_int sum)/.(float_of_int n)) else ((float_of_int (sum + m))/.(float_of_int (n + 1)))) else  (if ((includ (s.[i],0) alfav)||(includ (s.[i],1) alfav)) then (superfun s sum n (m+1) (i+1)) else (if m = 0 then (superfun s sum n 0 (i+1)) else (superfun s (sum+m) (n+1) 0 (i+1))));;
+print_string"\n";;
+print_float (superfun "it is beautiful" 0 0 0 0);;
+
