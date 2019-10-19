@@ -1,0 +1,62 @@
+let vowel = ['e';'y';'u';'i';'o';'a'];;
+
+let rec chek_include l x=
+match l with
+a::b->if a = x then true
+               else chek_include b x
+|[]->false;;
+
+let rec add_list l x=
+match l with
+(a,b)::c->if a = x then (a,b+1)::c
+                   else (a,b)::(add_list c x)
+|[]->[(x,1)];;
+
+let rec separate s l i=
+if i = String.length s then l
+                       else separate s (add_list l (s.[i])) (i + 1);;
+
+print_string"I separate string:\'You will never reach your destination \nif you stop and throw stones at every dog that barks.\'\n|";;
+List.iter (fun (x,y)->print_string"(";print_char x;print_string",";print_int y;print_string")|") (separate "You will never reach your destination if you stop and throw stones at every dog that barks." [] 0);;
+
+let rec math_expectation_str s f i sum=
+if i = String.length s then (float_of_int sum) /. (float_of_int i)
+                       else  (math_expectation_str s f (i+1) (sum + (f s i)));;
+
+let rec mo1 s=math_expectation_str s (fun s i->if (chek_include vowel s.[i]) then 1 else 0) 0 0;;
+print_string"\n\nmo that char is vowel with string:\'Diplomacy is the art of telling people \nto go to hell in such a way that they ask for directions.\' is ";;
+print_float (mo1 "Diplomacy is the art of telling people to go to hell in such a way that they ask for directions.");;
+
+let rec mo2 s=math_expectation_str s (fun s i->if i = ((String.length s) - 1) then 0 else (if (chek_include vowel s.[i])&&(chek_include vowel s.[i + 1]) then 1 else 0)) 0 0;;
+print_string"\n\nmo2(that vowel goes after vowel) with string:\'I no longer listen to what people say, \nI just watch what they do. Behavior never lies.\' is ";;
+print_float (mo2 "I no longer listen to what people say, I just watch what they do. Behavior never lies.");;
+
+let rec string_to_words s s1 i=
+   if i = String.length s then (if s1 = "" then [] else [s1]) 
+                          else (if (chek_include ['.';',';';';':';'?';'!';' '] s.[i]) then (if s1 = "" then (string_to_words s "" (i+1)) 
+                                                                                                   else (s1::(string_to_words s "" (i+1)))) 
+                                                                                  else (string_to_words s (s1^(String.make 1 s.[i])) (i+1)));;
+
+let rec math_expectation_list l f i sum=
+match l with
+a::b->math_expectation_list b f (i+1) (sum + (f a))
+|[]->(float_of_int sum)/.(float_of_int i);;
+
+let rec mo3 s=math_expectation_list (string_to_words s "" 0) (fun x->String.length x) 0 0;;
+print_string"\n\nmo3(lendth of word) with string:\'A nation that fails to honor its heroes, \nsoon will have no heroes to honor.\' is ";;
+print_float (mo3 "A nation that fails to honor its heroes, soon will have no heroes to honor.");;
+
+let rec sum_list l=match l with a::b->(a+(sum_list b)) |[]->0;;
+
+let rec mo4 t n1 n2=
+try
+   (let l = (string_to_words (input_line t) "" 0) in
+   (mo4 t (n1 + (sum_list (List.map (fun s->(String.length s)) l))) (n2 + (List.length l))))
+with
+   _->(float_of_int n1)/.(float_of_int n2);;
+
+
+let f = (open_in "saga.txt") ;;
+print_string"\nmath_expectation of length of word in saga.txt ";;
+print_float (mo4 f 0 0);;
+close_in f;;
