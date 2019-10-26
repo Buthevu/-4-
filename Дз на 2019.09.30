@@ -1,0 +1,164 @@
+let rec chek_include l x=
+match l with
+a::b->if a = x then true
+               else chek_include b x
+|[]->false;;
+
+let list_of_words str=
+let rec sup_fun s1 s2 i=                           
+if i = (String.length s1) then (if s2 = "" then [] else [s2])
+   else (if (chek_include ['.';',';';';':';'(';'\'';'?';'!';' ';')'] (s1.[i])) 
+           then (if s2 = "" then (sup_fun s1 "" (i+1)) 
+                            else (s2::(sup_fun s1 "" (i+1)))) 
+           else (sup_fun s1 (s2^(String.make 1 (s1.[i]))) (i+1))) in
+sup_fun str "" 0;;
+
+let rec longest_word_in_list l=
+match l with
+a::b->let s = (longest_word_in_list b) in
+      if (String.length s) > (String.length a) then s else a
+|[]->"";;
+                                 
+let longest_word_in_file s=      
+let f = (open_in s) in
+  let rec sup_fun t=
+    try
+       let s1 = (longest_word_in_list (list_of_words (input_line t))) in
+       let s2 = (sup_fun t) in
+       if (String.length s1) > (String.length s2) then s1 else s2
+    with
+       _->"" in
+let str = (sup_fun f) in
+close_in f;
+str;;                              
+     
+print_string "longest word in file saga.txt is ";
+print_string (longest_word_in_file "saga.txt");;
+
+let rec add l s=
+match l with
+(x,y)::b-> if x = s then ((x,(y+1))::b) else ((x,y)::(add b s))
+|[]->[(s,1)];;
+
+let separate_line str lin=
+let rec separate_list_of_words s s1 l i=
+    if i = (String.length s) then (if s1 = "" then l else (add l s1)) 
+                             else (if (s.[i] = ' ')||(s.[i] = '.') then (if s1 = "" then (separate_list_of_words s "" l (i+1)) 
+                                                                                    else (separate_list_of_words s "" (add l s1) (i+1)))
+                                                                   else (separate_list_of_words s (s1^(String.make 1 (s.[i]))) l (i+1))) in
+separate_list_of_words str "" lin 0;;
+
+
+let chastota str=
+let rec chast t l=
+try 
+   let s = input_line t in
+   (chast t (separate_line s l))
+with 
+   _->l in
+let f = open_in str in
+let lis = (chast f []) in
+close_in f;
+lis;; 
+                
+let turn_over l=
+let rec sup_f l1 l2=
+match l1 with
+a::b->(sup_f b (a::l2))
+|[]->l2 in
+sup_f l [];;
+            
+let bubble_sort l=
+let rec sort l1 l2 =
+match l1 with 
+(a,b)::(c,d)::t->if b >= d then  (sort ((c,d)::t) ((a,b)::l2)) else (sort ((turn_over l2) @ ((c,d)::(a,b)::t)) [])
+|_->((turn_over l2) @ l1) in
+(sort l []);;
+
+
+let rec first_n lis n=
+if n = 0 then [] else
+(match lis with
+(x,y)::b->((x,y)::(first_n b (n - 1)))
+|_->[]);;
+      
+                                                                                            
+print_string "\nMost popular word in saga.txt is ";;
+List.iter (fun (x,y) -> print_string x;print_string " ") (first_n (bubble_sort (chastota "saga.txt")) 1);;
+
+print_string "\nfirst 10 popular word in saga.txt is ";;
+List.iter (fun (x,y) -> print_string x;print_string " ") (first_n (bubble_sort (chastota "saga.txt")) 10);;
+                                                                                                      
+let rec filter l f=
+match l with
+a::b->if f a then (a::(filter b f)) else (filter b f)
+|[]->[];;
+
+print_string "\nfirst 10 popular word longer 3 in saga.txt is ";;
+List.iter (fun (x,y) -> print_string x;print_string " ") (first_n (filter (bubble_sort (chastota "saga.txt")) (fun (x,y) -> (2 < String.length x))) 10);;
+
+let math_expectation_list lis fu=
+let rec mo l f sum1 sum2=
+match l with
+(x,y)::b->mo b f (sum1 + (f x)) (sum2 + y)
+|[]->(float_of_int sum1)/.(float_of_int sum2) in
+mo lis fu 0 0;;
+
+print_string "\nmath_expectation of length of word in saga.txt is ";
+print_float (math_expectation_list (chastota "saga.txt") (fun x -> (String.length x)));;
+
+let char_utf8 t=
+let n1 = (input_byte t) in
+  if n1 land 0b10000000 = 0 
+     then n1
+     else if n1 land 0b11100000 = 0b11000000 then (let n2 = (input_byte t) in ((n1 land 0b00011111) lsl 6)+(n2 land 0b00111111))
+                                             else if n1 land 0b11110000 = 0b11100000 then (let n2 = (input_byte t) in
+                                                                                           let n3 = (input_byte t) in
+                                                                  (((n1 land 0b00001111) lsl 12)+((n2 land 0b00111111) lsl 6)+(n3 land 0b00111111)))
+                                                                                     else (let n2 = (input_byte t) in
+                                                                                           let n3 = (input_byte t) in
+                                                                                           let n4 = (input_byte t) in
+                                                                  (((n1 land 0b00000111) lsl 18)+((n2 land 0b00111111) lsl 12)+((n3 land 0b00111111) lsl 6)+(n4 land 0b00111111)));;
+let file_utf8_to_list_of_num s=
+let f = (open_in_bin s) in
+let rec sup_fun t=
+  try
+     let n = (char_utf8 t) in
+     n::(sup_fun t)  
+  with
+      _->[] in
+let l =(sup_fun f) in
+close_in f;
+l;;
+
+let int_to_utf8 n= if n <= 0b01111111 then [n] 
+                   else if (n <= 0x7ff) then [((n lsr 6) lor 0b11000000);((n land 0b00111111) lor 0b10000000)] 
+                        else if (n <= 0xffff) then [((n lsr 12) lor 0b11100000);(((n lsr 6) land 0b00111111) lor 0b10000000);((n land 0b00111111) lor 0b10000000)] else failwith"write code";;
+let glasn = [0x0410;0x0415;0x0418;0x041e;0x0423;0x042b;0x042d;0x042e;0x042f;
+             0x0430;0x0435;0x0438;0x043e;0x0443;0x044b;0x044d;0x044e;0x044f];;
+let udarenya lis=
+let rec sup_f l i1=
+match l with
+a::b-> if (chek_include glasn a) then (if i1 = 1 then (a::0x301::(sup_f b 0)) else (a::(sup_f b 0))) else (if (a < 0x030) then (a::(sup_f b 1)) else (a::(sup_f b i1)))
+|[]->[] in
+sup_f lis 1;;
+
+
+let file_with_udar s=
+let l = file_utf8_to_list_of_num s in
+let f = open_out ("udar_"^s) in
+List.iter (fun x -> (List.iter (fun y ->(output_byte f y)) (int_to_utf8 x))) (udarenya l);
+close_out f;;
+
+file_with_udar "text.txt";;
+
+print_string "\nLength of text.txt is ";;
+print_int (List.length (file_utf8_to_list_of_num "text.txt"));;
+
+print_string "\nLength of udar_text.txt is ";;
+print_int (List.length (file_utf8_to_list_of_num "udar_text.txt"));;
+
+
+
+
+
