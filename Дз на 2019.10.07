@@ -1,0 +1,16 @@
+let rec ip_to_int2 s i n1 n2 n3 s1 x=if i = (String.length s) then ((n1 lsl 24)+(n2 lsl 16)+(n3 lsl 8)+(int_of_string s1)) else (if s.[i] = '.' then (match x with
+                                                                                                                                                 0->ip_to_int2 s (i+1) (int_of_string s1) 0 0 "" 1
+                                                                                                                                                 |1->ip_to_int2 s (i+1) n1 (int_of_string s1) 0 "" 2
+                                                                                                                                                 |2->ip_to_int2 s (i+1) n1 n2 (int_of_string s1) "" 3
+                                                                                                                                                 |_->failwith"___") else (ip_to_int2 s (i+1) n1 n2 n3 (s1^(String.make 1 (s.[i]))) x));;
+let ip_to_int s= ip_to_int2 s 0 0 0 0 "" 0;;
+
+print_string "ip 0.0.1.11 to int is ";;
+print_int (ip_to_int "0.0.1.11");;
+let int_to_ip i=((string_of_int(i lsr 24))^"."^(string_of_int ((i lsr 16) land 0b11111111))^"."^(string_of_int ((i lsr 8) land 0b11111111))^"."^(string_of_int (i land 0b11111111)));;
+print_string "\n int 256 is ip ";;
+print_string (int_to_ip 256);;
+let rec chek_web addr ip masc =(((ip_to_int ip) land (ip_to_int masc)) = ((ip_to_int addr) land (ip_to_int masc)));;
+
+print_string"\nDoes ip 1.31.53.3 in web 1.31.0.0 with masc 255.255.0.0?";;
+if (chek_web "1.31.53.3" "1.31.0.0" "255.255.0.0") then print_string " Yes" else print_string " No";;
