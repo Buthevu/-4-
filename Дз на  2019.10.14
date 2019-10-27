@@ -1,0 +1,75 @@
+let file1 = (Sys.argv.(1));;
+let file2 = (Sys.argv.(2));;
+let file3 = (Sys.argv.(3));;
+let f2 = (open_out ("copy_of_"^file1));;
+let f1 = (open_in file1);;
+let rec copy_string t1 t2=
+try 
+   let s1 = (input_line t1) in
+   output_string t2 (s1^"\n");
+   copy_string t1 t2;
+with
+   _->();;
+
+copy_string f1 f2;;
+close_in f1;;
+close_out f2;;
+
+let f2 = (open_out_bin ("copy_of_"^file2));;
+let f1 = (open_in_bin file2);;
+let rec copy_bin t1 t2=
+try 
+   let n = (input_byte t1) in
+   output_byte t2 n;
+   copy_bin t1 t2;
+with
+   _->();;
+
+copy_bin f1 f2;;
+close_in f1;;
+close_out f2;;
+
+let int_to_utf8 n= if n <= 0b01111111 then [n] 
+                   else if (n <= 0x7ff) then [((n lsr 6) lor 0b11000000);((n land 0b00111111) lor 0b10000000)] 
+                                else [];;
+let rec write_bytes t l=
+match l with
+a::b->output_byte t a; write_bytes t b
+|[]->();;
+
+let rec ep1251_to_utf8 t1 t2=
+try 
+   let n = (input_byte t1) in 
+   write_bytes t2 (int_to_utf8 (if n <= 7 * 16 then n else (n + 848)));
+   ep1251_to_utf8 t1 t2;
+with
+    _->();;
+let f2 = (open_out_bin ("utf_8_of_"^file3));;
+let f1 = (open_in_bin file3);;
+
+ep1251_to_utf8 f1 f2;;
+
+close_in f1;;
+close_out f2;;
+
+
+let rec sup_f t l s=
+try
+   let s1 = input_line t in
+   if (String.length s) > (String.length s1) then (sup_f t (l @ [s1]) s) else (sup_f t (l @ [s1]) s1)
+with
+    _->(l,s);;
+
+let rec delay l y=
+match l with
+a::b-> if a = y then b else (a::(delay b y))
+|[]->[];;
+
+let f = (open_in file1);;
+let (l,s) = sup_f f [] "";;
+close_in f;;
+let f2 = (open_out file1);;
+
+List.iter (fun x -> output_string f2 (x^"\n")) (delay l s);;
+close_out f2;;
+ 
