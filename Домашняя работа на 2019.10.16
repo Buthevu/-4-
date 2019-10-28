@@ -1,0 +1,126 @@
+let rec info_for_char l=
+match l with
+a::b->
+      (((-1.)*.(a*.((log a)/.(log 2.))))+.(info_for_char b))
+|[]->0.;;
+
+print_string "Info for char in [0,1;0,3;0,4;0,2] is ";;
+print_float (info_for_char [0.1;0.3;0.4;0.2]);;
+
+print_string "\nInfo for char in [1;2;4;16,1] is ";;
+print_float (info_for_char (List.map (fun x -> (1./.(float_of_int x))) [1;2;4;16;1]));;
+
+let take_over lis=
+let rec sup_fun l1 l2 =
+match l1 with
+a::b->(sup_fun b (a::l2))
+|[]->l2 in
+(sup_fun lis []);;
+
+let add elem spisok=
+let rec sup_fun x l1 l2=
+match l1 with
+(a,i)::b->if x = a then (l2 @ ((a,(i+1))::b)) else (sup_fun x b ((a,i)::l2))
+|[]->((x,1)::l2) in
+(sup_fun elem spisok []);;
+
+let add_string_to_list str spisok=
+let rec sup_fun s l i=
+if i = (String.length s) then l else (sup_fun s (add (s.[i]) l) (i+1)) in
+(sup_fun str spisok 0);;
+
+let cp1251_to_info str=
+let rec sup_fun t l=
+try 
+   let s = (input_line t) in
+   (sup_fun t (add_string_to_list s l))
+with
+    _->(info_for_char (List.map (fun (x,y) -> (1./.(float_of_int y))) l)) in
+let f = (open_in str) in
+let fl = (sup_fun f []) in
+close_in f;fl;;
+
+
+
+let char_utf8 t=
+let n1 = (input_byte t) in
+  if n1 land 0b10000000 = 0 
+     then n1
+     else if n1 land 0b11100000 = 0b11000000 then (let n2 = (input_byte t) in ((n1 land 0b00011111) lsl 6)+(n2 land 0b00111111))
+                                             else if n1 land 0b11110000 = 0b11100000 then (let n2 = (input_byte t) in
+                                                                                           let n3 = (input_byte t) in
+                                                                  (((n1 land 0b00001111) lsl 12)+((n2 land 0b00111111) lsl 6)+(n3 land 0b00111111)))
+                                                                                     else (let n2 = (input_byte t) in
+                                                                                           let n3 = (input_byte t) in
+                                                                                           let n4 = (input_byte t) in
+                                                                  (((n1 land 0b00000111) lsl 18)+((n2 land 0b00111111) lsl 12)+((n3 land 0b00111111) lsl 6)+(n4 land 0b00111111)));;
+
+
+
+let utf8_file_to_info str =
+let rec sup_fun t l=
+try
+   let n = char_utf8 t in
+   (sup_fun t (add n l))
+with
+    _->(info_for_char (List.map (fun (x,y) -> (1./.(float_of_int y))) l)) in
+let f = (open_in_bin str) in
+let fl = (sup_fun f []) in
+close_in f;
+fl;;
+
+let rec weroyatn_in_utf8 str=
+let f = (open_in_bin str) in
+let rec sup_f t l=
+try
+   let n = char_utf8 t in
+   (sup_fun t (add n l))
+with
+    _->(List.map (fun (x,y)-> (x,(1./.(float_of_int y))))) in
+let fl = sup_f f [] in
+close_in f;fl;;
+
+
+type prefix = Question of prefix*prefix|Answer of int;;
+
+let rec answer pre l=
+match (pre,l) with
+(Answer i,_)-> i
+|(Question (pr1,pr2),0::b)->(answer pr1 b)
+|(Question (pr1,pr2),1::b)->(answer pr2 b)
+|_->failwith"";;
+
+let rec chek_prefix x pre=
+match pre with
+Answer i->(i = x)
+|Question (pr1,pr2)->((chek_prefix x pr1)||(chek_prefix x pr2));;
+
+let rec prefix_code i pre=
+match pre with
+Answer i->[]
+|Question (pr1,pr2)-> if (chek_prefix i pr1) then (0::(prefix_code i pr1)) else (1::(prefix_code i pr2));;
+
+let rec content pre =
+match pre with
+Answer i->[i]
+|Question (pr1,pr2)->((content pr1)@(content pr2));;
+
+let librery pre=
+List.map (fun x-> (x,(prefix_code x pre))) (content pre);;
+
+let rec separate l l1 li l2=
+match l with 
+(x,(0::b))::c->separate c ((x,b)::l1) l1 l2
+|(x,(1::b))::c->separate c l1 (x::li) ((x,b)::l2)
+|(x,[])::c->(l1,li,l2);;
+
+let rec list_to_lib l=
+let (l1,li,l2) = (separate l [] [] []) in
+match (l1,li,l2) with
+(_,a::[],_)->Answer a
+|_->Quetion ((list_to_lib l1),(list_to_lib l2));;
+
+
+
+
+
