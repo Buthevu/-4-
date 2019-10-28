@@ -74,7 +74,7 @@ let f = (open_in_bin str) in
 let rec sup_f t l=
 try
    let n = char_utf8 t in
-   (sup_fun t (add n l))
+   (sup_f t (add n l))
 with
     _->(List.map (fun (x,y)-> (x,(1./.(float_of_int y))))) in
 let fl = sup_f f [] in
