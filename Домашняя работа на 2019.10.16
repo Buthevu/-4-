@@ -110,15 +110,16 @@ List.map (fun x-> (x,(prefix_code x pre))) (content pre);;
 
 let rec separate l l1 li l2=
 match l with 
-(x,(0::b))::c->separate c ((x,b)::l1) l1 l2
-|(x,(1::b))::c->separate c l1 (x::li) ((x,b)::l2)
-|(x,[])::c->(l1,li,l2);;
+(x,(0::b))::c->separate c ((x,b)::l1) li l2
+|(x,(1::b))::c->separate c l1 li ((x,b)::l2)
+|(x,[])::c->separate c l1 (x::li) l2
+|[]->(l1,li,l2);;
 
 let rec list_to_lib l=
 let (l1,li,l2) = (separate l [] [] []) in
 match (l1,li,l2) with
 (_,a::[],_)->Answer a
-|_->Quetion ((list_to_lib l1),(list_to_lib l2));;
+|_->Question ((list_to_lib l1),(list_to_lib l2));;
 
 
 
