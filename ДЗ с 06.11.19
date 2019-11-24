@@ -1,0 +1,64 @@
+let rec add x l=
+match l with
+(y,i)::b-> if x = y then ((y,(i + 1))::b) else ((y,i)::(add x b))
+|[]->[(x,1)];;
+
+let separete s=
+let rec sup_f st i l=
+if i = (String.length s) then l else (sup_f st (i+1) (add (st.[i]) l)) in
+sup_f s 0 [];;
+
+let bubble_sort l=
+let rec sup_f l1 l2=
+match l1 with
+(a,i1)::(b,i2)::c -> if i1 <= i2 then (sup_f ((b,i2):: c) (l2 @ [(a,i1)])) else (sup_f (l2 @ ((b,i2)::(a,i1)::c)) [])
+|_->(l2 @ l1) in
+sup_f l [];;
+
+type prefix = Question of prefix*prefix |Answer of char;;
+
+
+let step l =
+match (bubble_sort l) with
+(a,i1)::(b,i2)::c->(bubble_sort ((Question (a,b),(i1+i2))::c))
+|_-> l;;
+
+let give_prefix l=
+let rec sup_f li=
+if ((List.length li) = 1) then li else (sup_f (step li)) in
+match (sup_f (List.map (fun (x,i) -> (Answer x,i)) l)) with
+(a,i)::b->a
+|[]->failwith"  ";;
+
+let rec print_prefix pr =
+match pr with
+Question (pr1,pr2) ->print_string "Question (";print_prefix pr1;print_string ",";print_prefix pr2;print_string ")"
+|Answer c->print_string "Answer ";print_char c;;
+
+let rec chek x pr=
+match pr with
+Question (pr1,pr2)->((chek x pr1)||(chek x pr2))
+|Answer y->(x = y);;
+
+let rec len x pr=
+match pr with
+Question (pr1,pr2)-> if (chek x pr1) then (1+(len x pr1)) else (1+(len x pr2))
+|_->0;;
+
+let rec sum l pr=
+match l with
+(c,i)::b->(((len c pr) * i)+(sum b pr))
+|[]->0;; 
+
+let rec fin s =
+let l = (separete s) in
+print_string ("Separate "^s^" is");
+List.iter (fun (x,i) -> print_string "|(";print_char x;print_string ",";print_int i;print_string ")") l;
+print_string"|\n prefix is ";
+let pr = (give_prefix l) in
+print_prefix pr;
+print_string "\nMedium length is ";
+print_float ((float_of_int (sum l pr))/.(float_of_int (String.length s)));;
+
+
+fin "abcdabcdabcd";;
