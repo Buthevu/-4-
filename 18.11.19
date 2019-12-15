@@ -1,0 +1,84 @@
+let seporate lis=
+let rec sup_f l x y z=
+match l with
+(0::a)::b->sup_f b (x @ [a]) y z
+|(1::a)::b->sup_f b x (y @ [a]) z
+|[]::b->sup_f b x y (z @ [[]])
+|[]->(x,y,z) in
+sup_f lis [] [] [];;
+
+let rec chek_pref l=
+let (x,y,z) = (seporate l) in
+match (x,y,z) with
+([],[],[a])->true         
+|([],[],[])->false
+|(_,[],[])->((chek_pref x))
+|([],_,[])->((chek_pref y))
+|(_,_,[])->((chek_pref x)&&(chek_pref y))
+|_->false;;
+
+let rec chek_sup_pref l=
+let (x,y,z) = (seporate l) in
+match (x,y,z) with
+([],[],[a])->true
+|(a::b,c::d,[])->((chek_pref x)&&(chek_pref y))
+|_->false;;
+
+let print_bool f=if f then print_string"Yes" else print_string"No";;
+
+print_string"Is [[1;0];[1;1;0]] a prefix code? Answer: ";;
+print_bool(chek_pref [[1;0];[1;1;0]]);;
+print_string"\n\nIs [[1;0];[1;1;0]] a sup_prefix code? Answer: ";;
+print_bool(chek_sup_pref [[1;0];[1;1;0]]);;
+
+let print_int_list l=
+let rec sup_f li=
+match li with
+a::b::c->print_int a;print_string";";sup_f (b::c)
+|a::b->print_int a;sup_f b
+|[]->print_string"]" in
+print_string"[";
+sup_f l;;
+
+let give i l=
+let rec sup_f n l1 l2=
+match l1 with
+a::b->if n <= 0 then (a,(l2 @ b)) else (sup_f (n - 1) b (l2 @ [a]))
+|[]->failwith(string_of_int n) in
+sup_f i l [];;
+
+let add i x l=
+let rec sup_f n y l1=
+match l1 with
+a::b->if n = 0 then (y::a::b) else (a::(sup_f (n - 1) y b))
+|[]->[y] in
+sup_f i x l;;
+
+let diferenses l1 l2=
+let rec sup_f lx ly tail1 tail2=
+match (lx,ly) with
+((y1,a)::b,(y2,c)::d)->if a = c then (sup_f b d (tail1 @ [(y1,a)]) (tail2 @ [(y2,c)])) else ((tail1 @ [(true,a)] @ b),(tail2 @ [(true,c)] @ d))
+|_->failwith"2" in
+sup_f l1 l2 [] [];;
+
+let rec clean l=
+match l with
+(true,i)::b->i::(clean b)
+|(false,i)::b->(clean b)
+|[]->[];;
+  
+let give_perfect lis =
+    let rec sup_f li i j =
+       if i = ((List.length li) - 1) then (li)
+           else if j = (List.length li) then (sup_f li (i+1) (i+2))
+               else (let (l1,lu) = (give i li) in
+               let (l2,lun) = (give (j - 1) lu) in
+               let (lx,ly) = (diferenses l1 l2) in
+               (sup_f (add j ly (add i lx lun)) i (j + 1))) in
+let list_p = (List.map (fun x-> (List.map (fun y-> (false,y)) x)) lis) in
+(List.map (fun x->clean x) (sup_f list_p 0 1));;
+
+
+print_string"\n\npref [[0;1;1;1];[0;0;0;1];[1;0];[1;1;0];[1;1;1;0];[1;1;1;1]] to sup_pref is \n"
+let l = [[0;1;1;1];[0;0;0;1];[1;0];[1;1;0];[1;1;1;0];[1;1;1;1]];;
+List.iter (fun x -> print_int_list x;print_string"|") (give_perfect l);;
