@@ -1,0 +1,60 @@
+let rec int_to_3_balanse n=
+if n = 0 then [] 
+         else if n > 0 then (if (n mod 3) = 0 then ((int_to_3_balanse (n / 3)) @ [0]) 
+                                             else if (n mod 3) = 1 then ((int_to_3_balanse ((n - 1) / 3)) @ [1])
+                                                                   else ((int_to_3_balanse ((n + 1) / 3)) @ [-1]))
+                       else (List.map (fun x -> -x) (int_to_3_balanse (-n)));;
+
+let rec string_of_3_balanse l=
+match l with
+1::b->"1"^(string_of_3_balanse b)
+|0::b->"0"^(string_of_3_balanse b)
+|(-1)::b->"$"^(string_of_3_balanse b)
+|[]->"";;
+
+let read_3_balanse str=
+let rec sup_f s i=
+if i < (String.length s) then (match s.[i] with
+                               '0'->(0::(sup_f s (i+1)))
+                              |'1'->(1::(sup_f s (i+1)))
+                              |'$'->((-1)::(sup_f s (i+1)))) else [] in
+sup_f str 0;;
+
+let rec turn_over l=
+match l with
+a::b->(turn_over b) @ [a]
+|[]->[];;
+
+let rec sum_3_balanse l1 l2=
+match ((turn_over l1),(turn_over l2)) with
+(0::b,c::d)->(sum_3_balanse (turn_over b) (turn_over d)) @ [c]
+|(a::b,0::d)->(sum_3_balanse (turn_over b) (turn_over d)) @ [a]
+|(-1::b,1::d)->(sum_3_balanse (turn_over b) (turn_over d)) @ [0]
+|(1::b,-1::d)->(sum_3_balanse (turn_over b) (turn_over d)) @ [0]
+|(-1::b,-1::d)->(sum_3_balanse (sum_3_balanse (turn_over b) [-1]) (turn_over d)) @ [1]
+|(1::b,1::d)->(sum_3_balanse (sum_3_balanse (turn_over b) [1]) (turn_over d)) @ [-1]
+|([],c::d)->l2
+|(a::b,[])->l1
+|([],[])->[];;
+
+let rec balanse_to_int l=
+match (turn_over l) with
+a::b->a + (balanse_to_int (turn_over b))*3
+|[]->0;;
+
+
+print_string"11 to 3 balanse is |";;
+List.iter (fun x ->print_int x;print_string"|") (int_to_3_balanse 11);;
+
+print_string"\n\n[1;-1;0;1] to string is ";;
+print_string (string_of_3_balanse [1;-1;0;1]);;
+
+print_string"\n\n\"1$01\" to list is |";;
+List.iter (fun x-> print_int x;print_string "|") (read_3_balanse "1$01");;
+
+print_string"\n\nsum of [1;-1;1] (7) and [1;-1] (2) is ";;
+List.iter (fun x-> print_int x;print_string"|") (sum_3_balanse [1;-1;1] [1;-1]);;
+
+print_string "\n\n[1;-1;0] to int is ";;
+print_int (balanse_to_int [1;-1;0]);;
+
