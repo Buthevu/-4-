@@ -1,0 +1,46 @@
+type tree = Leaf| Node of tree*tree;;
+
+let rec prog2 n=
+  let rec func l1 l2 =
+  match l1 with
+  a::b->((List.map (fun x -> (a,x)) l2) @ (func b l2))
+  |[]->[] in
+if n = 0 then [Leaf]
+         else if n = 1 then [Node (Leaf,Leaf)]
+                       else (let matr = ref [] in
+                             for i = 0 to (n-1) do
+                                 matr := ((List.map (fun (x,y) -> Node (x,y)) (func (prog2 (n-1-i)) (prog2 i))) @ !matr)
+                             done;!matr);;
+
+
+let rec print_tree p=
+match p with
+Leaf ->()
+|Node (p1,p2)->(print_string"(";print_tree p1;print_string",";print_tree p2;print_string")");;
+
+let rec prog1 n= List.length (prog2 n);;
+
+let rec depth p=
+match p with
+Node (p1,p2) -> 1 + (max (depth p1) (depth p2))
+|Leaf ->0;;
+
+let rec filter l f=
+match l with
+a::b->if (f a) then a::(filter b f) else (filter b f) 
+|[]->[];;
+
+print_string"prog 1\n let n = ";;
+(let n = (read_int()) in
+print_int (prog1 n));;
+
+print_string"\nprog 2\n let n = ";;
+(let n = (read_int()) in
+List.iter (fun x -> print_tree x;print_string"\n") (prog2 n));;
+
+print_string"\nprog 3\n let n = ";;
+(let n = (read_int()) in
+print_string"let k = ";
+let k = (read_int()) in
+List.iter (fun x -> print_tree x;print_string"\n") (filter (prog2 n) (fun x -> ((depth x) = k))));;
+
