@@ -1,0 +1,54 @@
+let rec separet n=
+if n = 1 then 1
+else if n = 2 then 2 else (let matr = ref 0 in
+for i = 1 to (n - 1) do
+matr := !matr + (separet i);
+done;
+!matr + 1
+);;
+         
+print_string"Say number to separete(prog num 1):";;      
+(let n = (read_int()) in
+print_int(separet n));;
+
+let rec list_separete n=
+if n = 1 then [[1]]
+else if n = 2 then [[1;1];[2]]
+else (let matr = ref [] in
+for i = 1 to (n - 1) do
+matr := !matr @ (List.map (fun x -> ((n-i)::x)) (list_separete i));
+done;
+(!matr @ [[n]])
+);;
+
+print_string"\nSay number to list of separetes (prog num 2):";;
+
+(let n = read_int() in
+List.iter (fun x -> (print_string"|";List.iter (fun y -> (print_int y;print_string"|")) x;print_string"\n")) (list_separete n));;
+
+let rec sup_f2 n max=
+if n = 0 then 1 else
+if n = 1 then 1 else
+(let matr = ref 0 in
+for i = 1 to (min n max) do
+matr := !matr + (sup_f2 (n - i) i);
+done;
+!matr
+);;
+
+let rec sup_f3 n max=
+if n = 0 then [] else
+if n = 1 then [[1]] else
+(let matr = ref [] in
+for i = 1 to (min n max) do
+matr := (!matr @ (List.map (fun x -> (i::x)) (sup_f3 (n - i) i)));
+done;
+if n <= max then (!matr @ [[n]])
+else !matr);;
+
+print_string"\nSay number to separete (prog num 3):";;
+(let n = (read_int()) in 
+print_int (sup_f2 n n));;
+print_string"\nSay number to list of separetes (prog num 4):";;
+(let n = read_int() in
+List.iter (fun x -> (print_string"|";List.iter (fun y -> (print_int y;print_string"|")) x;print_string"\n")) (sup_f3 n n));;
