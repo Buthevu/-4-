@@ -1,0 +1,33 @@
+print_string"Programm for horeses num(3) from homework on 13.01.2020\nSay the number of horses:";;
+let n = read_int();;
+let matrics=(Array.init n (fun _ -> Array.make n (0-1)));;
+
+let chek x y = if (((x > (0-1))&&(x < n))&&((y>(0-1))&&(y<n))) then (let i =((matrics.(y)).(x)) in if i = -1 then true else false)
+                                                         else false;;
+
+let steps x y =[(x+1,y+2);(x+2,y+1);(x+2,y-1);(x+1,y-2);(x-1,y-2);(x-2,y-1);(x-2,y+1);(x-1,y+2)];;
+ 
+let rec main x y i l=                                      
+if i = (n*n) then true 
+           else (match l with
+                 (n,m)::b ->if (chek n m) then ((matrics.(m)).(n)<-i;if (main n m (i+1) (steps n m)) then true
+                                                                                                     else ((matrics.(m)).(n)<-(0-1);(main x y i b)))
+                                           else (main x y i b)                                                                                   
+                |[]->((matrics.(y)).(x)<-(0-1));false);;
+
+
+let rec sup_f x y=
+if y = n then print_string"unposible"
+         else if x = n then (sup_f 0 (y+1))
+                       else ((matrics.(y)).(x)<-0;if (main x y 1 (steps x y)) 
+                                          then (print_string"\n";for i = 0 to (n-1) do (for j = 0 to (n-1) do (
+                               let r = (matrics.(j)).(i) in print_int r;for t = 0 to ((String.length (string_of_int (n*n))) - (String.length(string_of_int r))) do print_string" ";done) done);print_string"\n";done)
+                                               else ((matrics.(y)).(x)<-(0-1);sup_f (x+1) y));;
+
+                                                                         
+         
+sup_f 0 0;;
+(matrics.(0)).(0)<-0;;
+                   (*
+if (main 0 0 1 (steps 0 0)) then print_string"T" else print_string "F";;
+                     *)
