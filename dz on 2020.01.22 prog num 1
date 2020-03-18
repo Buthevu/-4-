@@ -1,0 +1,41 @@
+print_string"Programm 1 from homework from 13.01.2010\nSay the number of queens on board(please dont say numbers more then 7,or it will be too long):";;
+let n = (read_int());;
+
+let matrics = (Array.init n (fun _ -> Array.make n false));;
+
+let rec clean_colon colon=
+if colon = n then ()
+else (for i = 0 to (n - 1) do
+(matrics.(i)).(colon)<-false;
+done;clean_colon (colon+1));;
+
+let f n=print_int n;;
+let rec chek n1 n2 n3 colon=
+if colon <= -1 then true
+else if n1 < n then (if ((matrics.(n1)).(colon)) = true then false
+else if ((matrics.(n2)).(colon)) = true then false
+else if n3 < 0 then (chek (n1+1) n2 n3 (colon - 1))
+else if ((matrics.(n3)).(colon)) = true then false
+else (chek (n1 + 1) n2 (n3 - 1) (colon - 1)))
+else if ((matrics.(n2)).(colon)) = true then false
+else if n3 < 0 then (chek n1 n2 n3 (colon - 1))
+else if ((matrics.(n3)).(colon)) = true then false
+else (chek n1 n2 (n3 - 1) (colon - 1));;
+let rec step colon strok=
+if colon = n then true
+else if strok = n then false
+else if (chek (strok + 1) strok (strok - 1) (colon - 1)) then ((matrics.(strok)).(colon) <- true;
+if (step (colon+1) 0) = true then true
+else (clean_colon colon;step colon (strok + 1)))
+else (step colon (strok + 1));;
+
+
+if (step 0 0) then
+(
+for i = 0 to (n-1) do
+for j = 0 to (n-1) do
+if ((matrics.(i)).(j)) then (print_string"? ") else (print_string". ")
+done;
+print_string"\n";
+done;
+) else print_string"unpossible";;
