@@ -1,0 +1,55 @@
+let matrics_from_file s=
+let f = open_in s in
+let s1 = input_line f in
+let (n,m) = Scanf.sscanf s1 "%d %d" (fun a b -> (a,b)) in
+let matrics1 = Array.init n (fun _ -> Array.make m false) in
+for i = 0 to (n-1) do
+(let s2 = input_line f in
+for j = 0 to (m-1) do
+if s2.[j]= '1' then matrics1.(n-(i+1)).(j) <- true
+done;)
+done;
+close_in f;
+(matrics1,n,m);;
+
+let (matrics,n,m) = matrics_from_file "t.txt";;
+let matrics2 = Array.init n (fun _ -> Array.make m false);;
+
+let rec print_matrics x y=
+if y = (0-1) then () 
+else if x >= m then (print_string"\n";print_matrics 0 (y-1))
+else if matrics.(y).(x) then (print_string"1";print_matrics (x+1) y)
+else (print_string"0";print_matrics (x+1) y);;
+ 
+print_matrics 0 (n-1);; 
+
+let rec find x y =if x >= m then (false,0) else if matrics.(y).(x) then (true,x) else (find (x+1) y);;
+
+let clean x y = if (x >=m)||(y >= n) then () else (for i = x to (m-1) do (for j = y to (n-1) do (matrics2.(j).(i)<-false) done;) done;);; 
+
+let rec f x y = if (x<m)&&(y<n) then (matrics2.(y).(x)<-true) else ();;
+let rec g x y i=
+f x y;
+if x >= m then (if i then 1 else 0) else 
+if y = n then 0 else 
+if i then (if (x = (m-1))||(y = (n-1)) then ((g (x+2) (y+1) false)+1) else (f (x+2) (y+1);f (x+1) (y+1);(g (x+2) (y+1) (matrics.(y+1).(x+1)))+1))
+else if matrics.(y).(x) then (if (x = (m-1))||(y = (n-1)) then (((g (x+2) (y+1) false)+1)) else (f (x+1) (y+1);f (x+2) (y+1);(g (x+2) (y+1) (matrics.(y+1).(x+1))) + 1))
+else (let (p,x2) = (find x y) in
+      if p then (if (g (x+2) (y+1) (if (x = (m-1))||(y = (n-1)) then false else (matrics.(y+1).(x+1)))) > (g x2 y false) then
+                                               (clean (x+1) y;f (x+1) (y+1);f (x+1) (y+1);(g (x+2) (y+1) (if (x = (m-1))||(y = (n-1)) then false else (matrics.(y+1).(x+1))))) 
+                                     else (clean x (y+1);for i = x to x2 do (f i y) done;(g x2 y false)))
+      else (f (x+1) (y+1);f (x+2) (y+1);g (x+2) (y+1) (if (x = (m-1))||(y = (n-1)) then false else (matrics.(y+1).(x+1)))));;
+                 (*(max (g (x+2) (y+1) (if (x = (m-1))||(y = (n-1)) then false else (matrics.(y+1).(x+1)))) (g x2 y false))*)
+print_int (g 1 0 (matrics.(0).(0)));;
+
+print_string"\n";;
+
+matrics2.(0).(0) <-true;;
+matrics2.(0).(1) <-true;;
+let rec print_matrics2 x y=
+if y = (0-1) then () 
+else if x >= m then (print_string"\n";print_matrics2 0 (y-1))
+else if matrics2.(y).(x) then (print_string"*";print_matrics2 (x+1) y)
+else (print_string".";print_matrics2 (x+1) y);;
+
+print_matrics2 0 (n-1);;
