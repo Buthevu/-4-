@@ -1,0 +1,69 @@
+type l = Var of string|App of l * l|Abs of string * l;;
+                              
+
+let rec read_l s i=
+if s.[i] = '(' then (let (i2,l2)= read_l s (i+1) in 
+                                        let (i3,l3)= read_l s (i2+1) in (i3+1,App (l2,l3)))
+               else if s.[i] = '$' then (let (i2,s2)= read_s s (i+1) in
+                                        let (i3,l3)= read_l s (i2+1) in (i3,Abs (s2,l3)))
+                                   else let (i2,s2) = read_s s i in
+                                                   (i2,Var s2)
+
+and read_s s i=
+if i = String.length s then (i,"")
+                       else if (s.[i] = '.')||(s.[i] = ' ')||(s.[i] = ')') then (i,"")
+                                                                         else let (i2,s2) = (read_s s (i+1)) in
+                                                                                  (i2,((String.make 1 (s.[i]))^s2));;
+
+
+let rec string_of_l l=
+  match l with
+   Var s->s
+  |App (l1,l2) -> "("^(string_of_l l1)^" "^(string_of_l l2)^")"
+  |Abs (s,l2) -> "$"^s^"."^string_of_l l2;;
+
+let rec print_l2 l=
+  match l with
+   Var s->print_string"Var ";print_string s
+  |App (l1,l2) -> print_string"App (";print_l2 l1;print_string",";print_l2 l2;print_string")"
+  |Abs (s,l2) -> print_string"Abs (";print_string s;print_string",";print_l2 l2;print_string")";;
+
+
+let rec inf l=
+match l with 
+Var s->[s]
+|App (l1,l2)->((inf l1)@(inf l2))
+|Abs (s1,l1)->(s1::(inf l1));;
+
+let rec chek_include x l=
+match l with
+a::b->if x = a then true else (chek_include x b)
+|[]->false;;
+
+let rec find_new l i=
+if (chek_include (string_of_int i) l) then (find_new l (i+1)) else (string_of_int i);;
+
+let rec change_l l st1 st2=
+match l with
+Var s1->if s1 = st1 then (Var st2) else (Var s1)
+|App (l1,l2)->App (change_l l1 st1 st2,change_l l2 st1 st2)
+|Abs (s1,l1)->if s1 = st1 then (Abs (st2,change_l l1 st1 st2)) else (Abs (s1,change_l l1 st1 st2));;
+
+let rec chek l1 l2=
+match (l1,l2) with
+(Var s1,Var s2)->(s1 = s2)
+|(App (l11,l12),App (l21,l22))->((chek l11 l21) && (chek l12 l22))
+|(Abs (s1,l11),Abs (s2,l22))->let s3 = (find_new ((inf l1)@(inf l2)) 0) in 
+                                (chek (change_l l11 s1 s3) (change_l l22 s2 s3))
+|_->false;;
+
+
+(let (_,l1) = (read_l "$x.((x y) z)" 0) in
+let (_,l2) = (read_l "$u.((u y) z)" 0) in
+
+print_string"$x.((x y) z) to type l is:\n";
+print_l2 l1;
+print_string"\n$u.((u y) z) to type l is:\n";
+print_l2 l2;
+print_string"\n\nIs $u.((u y) z) $-equal to $x.((x y) z)?\nAnswer:";
+if (chek l1 l2) then print_string"Yes" else print_string"No");;
