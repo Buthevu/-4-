@@ -1,0 +1,27 @@
+let rec filter l x =
+match l with
+a::b->if a<x then (filter b x) else (a::(filter b x))
+|[]->[];;
+
+let rec rising_posl l=
+match l with
+a::b->((rising_posl b)@(List.map (fun x-> a::x) (rising_posl (filter b a))))
+|[]->[[]];;
+
+let print_int_list l=
+    print_string"[";
+
+    let rec func li =
+        match li with
+            [] -> print_string"]";
+          | a::[] -> print_int a; print_string"]"
+          | a::b -> print_int a; print_string";"; func b in func l;;
+
+let rec max_length_list l=
+  match l with
+    a::b::c->if (List.length a) > (List.length b) then (max_length_list (a::c)) 
+                                                  else (max_length_list (b::c))
+   |a::b->a
+   |[]->[];;
+
+print_int_list (max_length_list (rising_posl [3;1;4;1;5;9;2;6]));;
