@@ -1,0 +1,44 @@
+let rec delete x l=
+match l with
+a::b->if a = x then b else (a::(delete x b))
+|[]->[];;
+
+let rec filter l f=
+match l with
+a::b-> if f a then (a::(filter b f)) else (filter b f)
+|[]->[];;
+
+let rec value_of_list l=
+  match l with
+     (_,v)::b->(v+(value_of_list b))
+    |[]->0;;
+
+let rec find_best l=
+match l with
+a::b::c->if (value_of_list a) > (value_of_list b) then (find_best (a::c)) else (find_best (b::c))
+|a::b->a
+|[]->[];;
+
+let rec bag l w=
+if w <= 0 then [] else (
+let l0 = (filter l (fun (wi,vi) -> (wi <= w))) in
+let l1 = List.map (fun x-> (x,(delete x l0))) l0 in
+let l2 = List.map (fun ((wi,vi),y) -> (wi,vi)::(bag y (w-wi))) l1 in
+(find_best l2)
+);;
+
+let print_par_int_list l=
+    print_string"[";
+
+    let rec func li =
+        match li with
+            [] -> print_string"]";
+          | (x,y)::[] -> print_string"(";print_int x;print_string",";print_int y;print_string")";print_string"]"
+          | (x,y)::b -> print_string"(";print_int x;print_string",";print_int y;print_string");"; func b in func l;;
+
+
+print_string"bag problem\n W = 100\n thing is (wi,vi) wi is weight, vi is value:\n(50,2);(50,2);(100,7);(75,5);(1,1);(2,2);(3,3);(4,4)\nAnswer:\n";;
+
+print_par_int_list (bag [(50,2);(50,2);(100,7);(75,5);(1,1);(2,2);(3,3);(4,4)] 100);;
+
+
